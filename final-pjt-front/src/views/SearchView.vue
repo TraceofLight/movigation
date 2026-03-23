@@ -1,124 +1,118 @@
 <template>
-  <v-card
-    color="red lighten-2"
-    dark
-  >
-    <v-card-title class="text-h5 red lighten-3">
-      Search for Public APIs
-    </v-card-title>
-    <v-card-text>
-      Explore hundreds of free API's ready for consumption! For more information visit
-      <a
-        class="grey--text text--lighten-3"
-        href="https://github.com/toddmotto/public-apis"
-        target="_blank"
-      >the GitHub repository</a>.
-    </v-card-text>
-    <v-card-text>
-      <v-autocomplete
-        v-model="model"
-        :items="items"
-        :loading="isLoading"
-        :search-input.sync="search"
-        color="white"
-        hide-no-data
-        hide-selected
-        item-text="Description"
-        item-value="API"
-        label="Public APIs"
-        placeholder="Start typing to Search"
-        prepend-icon="mdi-database-search"
-        return-object
-      ></v-autocomplete>
-    </v-card-text>
-    <v-divider></v-divider>
-    <v-expand-transition>
-      <v-list
-        v-if="model"
-        class="red lighten-3"
-      >
-        <v-list-item
-          v-for="(field, i) in fields"
-          :key="i"
-        >
-          <v-list-item-content>
-            <v-list-item-title v-text="field.value"></v-list-item-title>
-            <v-list-item-subtitle v-text="field.key"></v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-expand-transition>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn
-        :disabled="!model"
-        color="grey darken-3"
-        @click="model = null"
-      >
-        Clear
-        <v-icon right>
-          mdi-close-circle
-        </v-icon>
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+  <section class="search-page surface-card">
+    <header class="search-header">
+      <p class="hero-kicker">Fast local filter</p>
+      <h1 class="section-title">Movie Search</h1>
+      <p class="section-copy">
+        Search against the cached movie list that already exists on the backend instead of the old Vuetify public API demo.
+      </p>
+    </header>
+
+    <label class="search-label" for="movie-search">Search by title</label>
+    <input
+      id="movie-search"
+      v-model.trim="query"
+      class="search-input"
+      type="search"
+      placeholder="Search by title"
+    />
+
+    <p class="search-summary">
+      <span v-if="isLoading">Loading movies...</span>
+      <span v-else>{{ filteredMovies.length }} title(s) matched</span>
+    </p>
+
+    <div v-if="loadError" class="status-copy status-copy--error">{{ loadError }}</div>
+    <MovieList v-else :movies="filteredMovies" />
+  </section>
 </template>
 
 <script>
-  export default {
-    data: () => ({
-      descriptionLimit: 60,
-      entries: [],
+import axios from 'axios'
+
+import MovieList from '@/components/MovieList.vue'
+import drf from '@/api/drf'
+
+export default {
+  name: 'SearchView',
+  components: {
+    MovieList,
+  },
+  data() {
+    return {
+      movies: [],
+      query: '',
       isLoading: false,
-      model: null,
-      search: null,
-    }),
+      loadError: '',
+    }
+  },
+  computed: {
+    filteredMovies() {
+      const needle = this.query.toLowerCase()
 
-    computed: {
-      fields () {
-        if (!this.model) return []
+      if (!needle) {
+        return this.movies
+      }
 
-        return Object.keys(this.model).map(key => {
-          return {
-            key,
-            value: this.model[key] || 'n/a',
-          }
-        })
-      },
-      items () {
-        return this.entries.map(entry => {
-          const Description = entry.Description.length > this.descriptionLimit
-            ? entry.Description.slice(0, this.descriptionLimit) + '...'
-            : entry.Description
-
-          return Object.assign({}, entry, { Description })
-        })
-      },
+      return this.movies.filter(movie =>
+        (movie.title || movie.name || '').toLowerCase().includes(needle)
+      )
     },
+  },
+  created() {
+    this.fetchMovies()
+  },
+  methods: {
+    fetchMovies() {
+      this.isLoading = true
+      this.loadError = ''
 
-    watch: {
-      search () {
-        // Items have already been loaded
-        if (this.items.length > 0) return
-
-        // Items have already been requested
-        if (this.isLoading) return
-
-        this.isLoading = true
-
-        // Lazily load input items
-        fetch('https://api.publicapis.org/entries')
-          .then(res => res.json())
-          .then(res => {
-            const { count, entries } = res
-            this.count = count
-            this.entries = entries
-          })
-          .catch(err => {
-            console.log(err)
-          })
-          .finally(() => (this.isLoading = false))
-      },
+      axios
+        .get(drf.movies.list())
+        .then(({ data }) => {
+          this.movies = Array.isArray(data) ? data : []
+        })
+        .catch(() => {
+          this.loadError = 'Movies could not be loaded for search.'
+        })
+        .finally(() => {
+          this.isLoading = false
+        })
     },
-  }
+  },
+}
 </script>
+
+<style scoped>
+.search-page {
+  padding: 2rem;
+}
+
+.search-header {
+  margin-bottom: 1.5rem;
+}
+
+.search-label {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+
+.search-input {
+  width: 100%;
+  border: 1px solid var(--panel-line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+}
+
+.search-summary {
+  color: var(--muted);
+  margin: 1rem 0 1.5rem;
+}
+
+.status-copy--error {
+  color: var(--danger);
+}
+</style>

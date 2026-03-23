@@ -9,10 +9,11 @@ export default {
     logout: () => HOST + ACCOUNTS + 'logout/',
     signup: () => HOST + ACCOUNTS + 'signup/',
     currentUserInfo: () => HOST + ACCOUNTS + 'user/',
-    // googleAuth: () => HOST + ACCOUNTS + 'google/',
+    profile: username => HOST + ACCOUNTS + `profile/${username}/`,
   },
   movies: {
+    list: () => HOST + MOVIES,
     movie: TMDBMovieId => HOST + MOVIES + `${TMDBMovieId}/`,
-    likeGenre: TMDBGenreId => HOST + MOVIES + `${TMDBGenreId}/` + 'genre/',
+    likeGenre: TMDBGenreId => HOST + MOVIES + `${TMDBGenreId}/genre/`,
   },
 }

@@ -1,63 +1,50 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import FeaturedView from '../views/FeaturedView.vue'
-import SearchView from '../views/SearchView.vue'
-import ReviewView from '../views/ReviewView.vue'
-import LoginView from '../views/LoginView.vue'
-import LogoutView from '../views/LogoutView.vue'
-import ProfileView from '../views/ProfileView.vue'
-import SignupView from '../views/SignupView.vue'
-
-
-Vue.use(VueRouter)
+import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: HomeView
+    component: () => import('../views/HomeView.vue')
   },
   {
     path: '/featured',
     name: 'Featured',
-    component: FeaturedView
+    component: () => import('../views/FeaturedView.vue')
   },
   {
     path: '/search',
     name: 'Search',
-    component: SearchView
+    component: () => import('../views/SearchView.vue')
   },
   {
     path: '/review',
     name: 'Review',
-    component: ReviewView
+    component: () => import('../views/ReviewView.vue')
   },
   {
     path: '/login',
     name: 'Login',
-    component: LoginView
+    component: () => import('../views/LoginView.vue')
   },
   {
     path: '/profile',
     name: 'Profile',
-    component: ProfileView
+    component: () => import('../views/ProfileView.vue')
   },
   {
     path: '/signup',
     name: 'Signup',
-    component: SignupView
+    component: () => import('../views/SignupView.vue')
   },
   {
     path: '/logout',
     name: 'Logout',
-    component: LogoutView
+    component: () => import('../views/LogoutView.vue')
   },
 ]
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
 

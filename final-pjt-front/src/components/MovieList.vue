@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import MovieCard from '@/components/MovieCard'
+import MovieCard from '@/components/MovieCard.vue'
 
 export default {
   name: 'movieList',

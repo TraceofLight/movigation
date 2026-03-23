@@ -1,19 +1,19 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
+
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import vuetify from './plugins/vuetify'
-import VModal from 'vue-js-modal'
-import VueAgile from 'vue-agile'
 
-Vue.config.productionTip = false
+export function createMovigationApp(rootComponent = App) {
+  const app = createApp(rootComponent)
 
-new Vue({
-  router,
-  store,
-  vuetify,
-  render: h => h(App)
-}).$mount('#app')
+  app.use(router)
+  app.use(store)
 
-Vue.use(VModal, { dynamic: true })
-Vue.use(VueAgile)
+  return { app, router, store }
+}
+
+if (!import.meta.vitest) {
+  const { app } = createMovigationApp()
+  app.mount('#app')
+}

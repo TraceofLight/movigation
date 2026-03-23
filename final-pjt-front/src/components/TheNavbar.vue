@@ -1,121 +1,184 @@
 <template>
-  <v-container>
-    <LoginPage />
-    <nav>
-      <v-app-bar app elevate-on-scroll>
-        <template v-slot:img="{ props }">
-          <v-img v-bind="props"
-          gradient="to top right, rgba(19,84,122,.5), rgba(128,208,199,.8)"
-          src="@/assets/nav-bg.jpg"></v-img>
-        </template>
+  <header class="nav-shell surface-card">
+    <div class="nav-brand-row">
+      <router-link class="brand-link" :to="{ name: 'Home' }">
+        <span class="brand-mark">M</span>
+        <span class="brand-text">Movigation</span>
+      </router-link>
 
-        <router-link class="d-flex" style="text-decoration: none;" to="/">
-          <v-btn plain>
-            <v-icon style="color: black;">mdi-movie-play</v-icon>
-            <v-toolbar-title style="color: black;" class="ml-5">Movigation</v-toolbar-title>
-          </v-btn>
-        </router-link>
+      <button class="menu-toggle" type="button" @click="menuOpen = !menuOpen">
+        {{ menuOpen ? 'Close' : 'Menu' }}
+      </button>
+    </div>
 
-        <v-spacer/>
-
-          <router-link style="text-decoration: none; color: black;" :to="{ name: 'Featured' }">
-            <v-btn class="mx-2" plain>
-              Featured
-            </v-btn>
-          </router-link>
-
-          <router-link style="text-decoration: none; color: black;" :to="{ name: 'Search' }">
-            <v-btn class="mx-2" plain>
-              Search
-            </v-btn>
-          </router-link>
-
-          <router-link style="text-decoration: none; color: black;" :to="{ name: 'Review' }">
-            <v-btn class="mx-2" plain>
-              Review
-            </v-btn>
-          </router-link>
-
-        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-      </v-app-bar>
-
-      <v-navigation-drawer
-        v-model="drawer"
-        fixed
-        temporary
-        right
+    <nav class="nav-links" :class="{ 'nav-links--open': menuOpen }">
+      <router-link class="nav-link" :to="{ name: 'Featured' }" @click="menuOpen = false">
+        Featured
+      </router-link>
+      <router-link class="nav-link" :to="{ name: 'Search' }" @click="menuOpen = false">
+        Search
+      </router-link>
+      <router-link class="nav-link" :to="{ name: 'Review' }" @click="menuOpen = false">
+        Review
+      </router-link>
+      <router-link
+        v-if="isLoggedIn"
+        class="nav-link"
+        :to="{ name: 'Profile' }"
+        @click="menuOpen = false"
       >
-        <router-link style="text-decoration: none;" :to="{ name: 'Home' }">
-          <v-list-item link>
-            <v-list-item-icon>
-              <v-icon>mdi-home</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Home</v-list-item-title>
-          </v-list-item>
-        </router-link>
-
-        <router-link style="text-decoration: none;" :to="{ name: 'Profile' }" v-if="isLoggedIn">
-          <v-list-item link>
-            <v-list-item-icon>
-              <v-icon>mdi-account</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Account</v-list-item-title>
-          </v-list-item>
-        </router-link>
-        
-        <v-list-item :to="{ name: 'Login' }" v-if="isNotLoggedIn">
-          <v-list-item-icon>
-            <v-icon>mdi-login</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Login</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item :to="{ name: 'Logout' }" v-if="isLoggedIn">
-          <v-list-item-icon>
-            <v-icon>mdi-logout</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Logout</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item :to="{ name: 'Signup' }" v-if="isNotLoggedIn">
-          <v-list-item-icon>
-            <v-icon>mdi-clipboard-account-outline</v-icon>
-          </v-list-item-icon>
-          <v-list-item-title>Sign Up</v-list-item-title>
-        </v-list-item>
-
-      </v-navigation-drawer>
-      <router-view/>
+        Account
+      </router-link>
+      <router-link
+        v-if="isNotLoggedIn"
+        class="nav-link nav-link--ghost"
+        :to="{ name: 'Login' }"
+        @click="menuOpen = false"
+      >
+        Login
+      </router-link>
+      <router-link
+        v-if="isNotLoggedIn"
+        class="nav-link nav-link--accent"
+        :to="{ name: 'Signup' }"
+        @click="menuOpen = false"
+      >
+        Sign Up
+      </router-link>
+      <router-link
+        v-if="isLoggedIn"
+        class="nav-link nav-link--accent"
+        :to="{ name: 'Logout' }"
+        @click="menuOpen = false"
+      >
+        Logout
+      </router-link>
     </nav>
-  </v-container>
+  </header>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 
-  import { mapGetters, mapActions } from 'vuex'
-
-  export default {
-
-    name: 'TheNavbar',
-
-    components: {
-    },
-
-    data() {
-      return {
-        drawer: false,
-      }
-    },
-
-    computed: {
-    ...mapGetters(['isLoggedIn', 'isNotLoggedIn'])
-    },
-
-    methods: {
-      ...mapActions(['logout']),
-    },
-  }
+export default {
+  name: 'TheNavbar',
+  data() {
+    return {
+      menuOpen: false,
+    }
+  },
+  computed: {
+    ...mapGetters(['isLoggedIn', 'isNotLoggedIn']),
+  },
+}
 </script>
 
-<style>
+<style scoped>
+.nav-shell {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  z-index: 20;
+  width: min(1180px, calc(100% - 2rem));
+  transform: translateX(-50%);
+  padding: 1rem 1.25rem;
+}
+
+.nav-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #04101e;
+  font-weight: 800;
+}
+
+.brand-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.menu-toggle {
+  display: none;
+  border: 1px solid var(--panel-line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  padding: 0.65rem 1rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  text-decoration: none;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--muted);
+  transition: 0.2s ease;
+}
+
+.nav-link:hover,
+.router-link-active.nav-link {
+  color: var(--text);
+  border-color: var(--panel-line);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-link--ghost {
+  border-color: var(--panel-line);
+}
+
+.nav-link--accent {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #04101e;
+  font-weight: 700;
+}
+
+.nav-link--accent.router-link-active,
+.nav-link--accent:hover {
+  border-color: transparent;
+  color: #04101e;
+}
+
+@media (max-width: 720px) {
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nav-links--open {
+    display: flex;
+  }
+}
 </style>

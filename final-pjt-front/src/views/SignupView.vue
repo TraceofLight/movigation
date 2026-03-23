@@ -1,229 +1,209 @@
 <template>
-  <v-container id="SignupView">
-    <div class="box d-flex mx-auto">
+  <section id="SignupView" class="signup-page">
+    <div class="box signup-box">
       <div class="box-part" id="bp-left">
-        <div class="partition" id="partition-register">
+        <div class="partition">
           <div class="partition-title">REGISTER ACCOUNT</div>
           <div class="partition-form">
-            <form autocomplete="false">
+            <form autocomplete="false" @submit.prevent="signup(payload)">
               <div class="autocomplete-fix">
-                <input disabled type="password password2">
+                <input disabled type="password" />
               </div>
-              <input v-model="payload.credentials.email" id="email" type="text" placeholder="Email" required>
-              <input v-model="payload.credentials.username" id="username" type="text" placeholder="Username" required>
-              <input v-model="payload.credentials.password1" id="password1" type="password" placeholder="Password" required>
-              <input v-model="payload.credentials.password2" id="password2" type="password" placeholder="Password Confirmation" required>
+              <input v-model="payload.credentials.email" type="email" placeholder="Email" required />
+              <input v-model="payload.credentials.username" type="text" placeholder="Username" required />
+              <input v-model="payload.credentials.password1" type="password" placeholder="Password" required />
+              <input
+                v-model="payload.credentials.password2"
+                type="password"
+                placeholder="Password Confirmation"
+                required
+              />
+
+              <button class="large-btn" type="submit">Register</button>
+              <router-link :to="{ name: 'Login' }">
+                <button class="large-btn" id="goback-btn" type="button">Go Back</button>
+              </router-link>
             </form>
 
-            <div style="margin-top: 21px">
-            </div>
-            <button class="large-btn" @click="signup(payload)">Register</button>
-            <router-link :to="{ name: 'Login' }">
-              <button class="large-btn" id="goback-btn">GO BACK</button>
-            </router-link>
-            <router-view/>
+            <p v-if="signupAuthError" class="error-copy">
+              Registration failed. Please check the submitted values.
+            </p>
           </div>
         </div>
       </div>
-      <div class="box-part" id="bp-right">
+
+      <div class="box-part genre-panel" id="bp-right">
+        <p class="genre-label">Choose favorite genres</p>
+        <div class="genre-grid">
+          <button
+            v-for="genre in genreOptions"
+            :key="genre.id"
+            type="button"
+            class="genre-button"
+            :class="{ 'genre-button--selected': payload.genres.includes(genre.id) }"
+            @click="toggleGenre(genre.id)"
+          >
+            {{ genre.label }}
+          </button>
+        </div>
       </div>
     </div>
-  <div class="genre-box d-flex flex-column justify-center">
-    <h1 class="mx-auto mt-12 mb-10 genre-title">Choose Favorite Genre</h1>
-    <v-btn-toggle class="d-flex flex-wrap" color="primary" v-model="toggle_multiple" multiple>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="10770">TV영화</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="878">SF</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="10751">가족</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="27">공포</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="99">다큐멘터리</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="18">드라마</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="10749">로맨스</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="12">모험</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="9648">미스터리</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="80">범죄</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="37">서부</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="53">스릴러</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="16">애니메이션</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="28">액션</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="36">역사</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="10402">음악</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="10752">전쟁</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="35">코미디</v-btn>
-      <v-btn x-large @click="onSelectGenre" class="raise genre-button" data-id="14">판타지</v-btn>
-    </v-btn-toggle>
-  </div>
-  </v-container>
+  </section>
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 
-  import { mapActions, mapGetters } from 'vuex'
-
-  export default {
-    name: 'SignupView',
-    data: function () {
-      return {
-        payload: {
-          genres: [],
-          credentials: {
-            email: '',
-            username: '',
-            password1: '',
-            password2: '',
-          },
-      }}
-    },
-    computed: {
-      ...mapGetters(['signupAuthError'])
-    },
-    methods: {
-      ...mapActions(['signup']),
-
-      onSelectGenre: function (event) {
-        const genreId = event.target.dataset.id
-        const genreBtn = event.target
-        if (!genreBtn.classList.contains('raise-focus')) {
-          genreBtn.classList.add('raise-focus')
-          this.payload.genres.push(genreId)
-        } else {
-          genreBtn.classList.remove('raise-focus')
-          const idx = this.payload.genres.indexOf(genreId)
-          this.payload.genres.splice(idx, 1)
-        }
-      }
+export default {
+  name: 'SignupView',
+  data() {
+    return {
+      payload: {
+        genres: [],
+        credentials: {
+          email: '',
+          username: '',
+          password1: '',
+          password2: '',
+        },
+      },
+      genreOptions: [
+        { id: '10770', label: 'TV Movie' },
+        { id: '878', label: 'SF' },
+        { id: '10751', label: 'Family' },
+        { id: '27', label: 'Horror' },
+        { id: '99', label: 'Documentary' },
+        { id: '18', label: 'Drama' },
+        { id: '10749', label: 'Romance' },
+        { id: '12', label: 'Adventure' },
+        { id: '9648', label: 'Mystery' },
+        { id: '80', label: 'Crime' },
+        { id: '37', label: 'Western' },
+        { id: '53', label: 'Thriller' },
+        { id: '16', label: 'Animation' },
+        { id: '28', label: 'Action' },
+        { id: '36', label: 'History' },
+        { id: '10402', label: 'Music' },
+        { id: '10752', label: 'War' },
+        { id: '35', label: 'Comedy' },
+        { id: '14', label: 'Fantasy' },
+      ],
     }
-  }
+  },
+  computed: {
+    ...mapGetters(['signupAuthError']),
+  },
+  methods: {
+    ...mapActions(['signup']),
+    toggleGenre(genreId) {
+      if (this.payload.genres.includes(genreId)) {
+        this.payload.genres = this.payload.genres.filter(id => id !== genreId)
+        return
+      }
 
+      this.payload.genres = [...this.payload.genres, genreId]
+    },
+  },
+}
 </script>
 
-<style lang="scss">
-
-#SignupView {
-  padding-top: 5%;
+<style scoped lang="scss">
+.signup-page {
+  min-height: calc(100vh - 10rem);
 }
 
-.box {
-  background: white;
+.signup-box {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   overflow: hidden;
-  width: 656px;
-  height: 400px;
-  border-radius: 2px;
-  box-sizing: border-box;
-  box-shadow: 0 0 40px black;
-  color: #8b8c8d;
-  font-size: 0;
-  .box-part {
-    display: inline-block;
-    position: relative;
-    vertical-align: top;
-    box-sizing: border-box;
-    height: 100%;
-    width: 50%;
-    &#bp-right {
-      border-left: 1px solid #eee;
-    }
-  }
-  .box-messages {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-  }
-  .box-error-message {
-    position: relative;
-    overflow: hidden;
-    box-sizing: border-box;
-    height: 0;
-    line-height: 32px;
-    padding: 0 12px;
-    text-align: center;
-    width: 100%;
-    font-size: 11px;
-    color: white;
-    background: #f38181;
-  }
-  .partition {
-    width: 100%;
-    height: 100%;
-    .partition-title {
-      box-sizing: border-box;
-      padding: 30px;
-      width: 100%;
-      text-align: center;
-      letter-spacing: 1px;
-      font-size: 20px;
-      font-weight: 300;
-    }
-    .partition-form {
-      padding: 0 20px;
-      box-sizing: border-box;
-    }
-  }
-  input[type='password'],
-  input[type='password2'],
-  input[type='text'] {
-    display: block;
-    box-sizing: border-box;
-    margin-bottom: 4px;
-    width: 100%;
-    font-size: 12px;
-    line-height: 2;
-    border: 0;
-    border-bottom: 1px solid #dddedf;
-    padding: 4px 8px;
-    font-family: inherit;
-    transition: 0.5s all;
-  }
-  button {
-    background: white;
-    border-radius: 4px;
-    box-sizing: border-box;
-    padding: 10px;
-    letter-spacing: 1px;
-    font-family: 'Open Sans', sans-serif;
-    font-weight: 400;
-    min-width: 140px;
-    margin-top: 8px;
-    color: #8b8c8d;
-    cursor: pointer;
-    border: 1px solid #dddedf;
-    text-transform: uppercase;
-    transition: 0.1s all;
-    font-size: 10px;
-    &:hover {
-      border-color: mix(#dddedf, black, 90%);
-      color: mix(#8b8c8d, black, 80%);
-    };
-  }
-  .large-btn {
-    width: 100%;
-    background: white;
-    span {
-      font-weight: 600;
-    }
-  }
-  .autocomplete-fix {
-    position: absolute;
-    visibility: hidden;
-    overflow: hidden;
-    opacity: 0;
-    width: 0;
-    height: 0;
-    left: 0;
-    top: 0;
-  }
+  background: white;
+  color: #526077;
+  border-radius: 24px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.35);
 }
-.pop-out-enter-active,
-.pop-out-leave-active {
-  transition: all 0.5s;
+
+.partition-title {
+  padding: 2rem;
+  text-align: center;
+  letter-spacing: 1px;
+  font-size: 1.2rem;
+  font-weight: 300;
 }
-.pop-out-enter,
-.pop-out-leave-active {
-  opacity: 0;
-  transform: translateY(24px);
+
+.partition-form,
+.genre-panel {
+  padding: 0 1.5rem 1.5rem;
 }
+
+input {
+  display: block;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  font-size: 0.95rem;
+  line-height: 2;
+  border: 0;
+  border-bottom: 1px solid #dddedf;
+  padding: 0.35rem 0.5rem;
+}
+
+.large-btn,
 .genre-button {
-  margin: 5px;
-  width: 30px;
+  border-radius: 999px;
+  border: 1px solid #d4ddeb;
+  background: white;
+  color: #304154;
+  cursor: pointer;
+}
+
+.large-btn {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  margin-top: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.genre-label {
+  margin: 0;
+  padding-top: 2rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.genre-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.genre-button {
+  padding: 0.6rem 0.95rem;
+}
+
+.genre-button--selected {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #04101e;
+  border-color: transparent;
+}
+
+.error-copy {
+  color: #c14444;
+  margin-top: 1rem;
+}
+
+.autocomplete-fix {
+  position: absolute;
+  visibility: hidden;
+  overflow: hidden;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+@media (max-width: 900px) {
+  .signup-box {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

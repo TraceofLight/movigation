@@ -1,29 +1,32 @@
 <template>
-  <v-container id="logoutView">
-  </v-container>
+  <section class="logout-page surface-card">
+    <h1 class="section-title">Signing Out</h1>
+    <p class="section-copy">
+      Your session is being cleared and you will be returned to the home screen.
+    </p>
+  </section>
 </template>
 
 <script>
+import router from '@/router'
+import { mapActions } from 'vuex'
 
-  import { mapActions } from 'vuex'
-  import router from '@/router'
-
-  export default {
-    name: 'LogoutView',
-    data() {
-      return {
-      }
-    },
-    computed: {
-      ...mapActions(['logout'])
-    },
-    mounted() {
-      window.onload=function() {
-        this.logout
-      }
+export default {
+  name: 'LogoutView',
+  created() {
+    this.logout().finally(() => {
       router.push({ name: 'Home' })
-      location.reload()
-    },
-  }
-
+    })
+  },
+  methods: {
+    ...mapActions(['logout']),
+  },
+}
 </script>
+
+<style scoped>
+.logout-page {
+  padding: 2rem;
+  text-align: center;
+}
+</style>
